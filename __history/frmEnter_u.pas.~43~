@@ -1,0 +1,91 @@
+unit frmEnter_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, jpeg, StdCtrls, dmConnection_u, Grids, DBGrids, DBCtrls;
+
+type
+  TfrmEnter = class(TForm)
+    imgBanner: TImage;
+    lblCaption: TLabel;
+    pnlWinLose: TPanel;
+    pnlEnterGame: TPanel;
+    lblWon: TLabel;
+    lblLost: TLabel;
+    lblWonNum: TLabel;
+    lblLostNum: TLabel;
+    btnStart: TButton;
+    Label1: TLabel;
+    memHowToPlay: TMemo;
+    pnlHowToPlay: TPanel;
+    lblHowToPlay: TLabel;
+    DBGrid1: TDBGrid;
+    DBNavigator1: TDBNavigator;
+    procedure FormActivate(Sender: TObject);
+    procedure btnStartClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmEnter: TfrmEnter;
+
+implementation
+
+uses
+  frmGame_u;
+{$R *.dfm}
+
+procedure TfrmEnter.btnStartClick(Sender: TObject);
+begin
+  Self.Hide;
+  // Self.Close;
+  frmGame.Show;
+end;
+
+procedure TfrmEnter.FormActivate(Sender: TObject);
+var
+  iPageCenter: Integer;
+begin
+  iPageCenter := frmEnter.Width div 3;
+
+  // Use this to make the GUI so you can easily manipulate components
+  imgBanner.Width := Screen.Width;
+  lblCaption.Left := iPageCenter;
+  pnlEnterGame.Left := iPageCenter;
+  pnlHowToPlay.Width := 250;
+  memHowToPlay.Width := 243;
+  memHowToPlay.Height := 170;
+
+  // Extra features to make the UI look better
+  { if (StrToInt(lblWonNum.Caption) > StrToInt(lblLostNum.Caption)) then
+    begin
+    lblWon.Font.Color := clLime;
+    end
+    else if (StrToInt(lblWonNum.Caption) < StrToInt(lblLostNum.Caption)) then
+    begin
+    lblWon.Font.Color := clRed;
+    lblLost.Font.Color := clRed;
+    end
+    else
+    begin
+    lblWon.Font.Color := clBlack;
+    lblLost.Font.Color := clBlack;
+    end; }
+
+  // We don't want the player to edit this...
+  memHowToPlay.ReadOnly := true;
+  memHowToPlay.Clear;
+  memHowToPlay.Lines.Add(
+    'This game is based off a game/anime called "Yu-Gi-OH!"' +
+      ', where 2 players get together and fight each other with their cards.' +
+      #13 + 'The game works as follows:');
+
+  lblWonNum.Caption := dmCards.tblWinLose['won'];
+end;
+
+end.

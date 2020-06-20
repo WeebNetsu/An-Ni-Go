@@ -1,0 +1,106 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 544
+  ClientWidth = 751
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesktopCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object imgTest: TImage
+    Left = 328
+    Top = 240
+    Width = 105
+    Height = 105
+  end
+  object edtSrc: TEdit
+    Left = 110
+    Top = 435
+    Width = 555
+    Height = 21
+    TabOrder = 0
+    Text = 'edtSrc'
+  end
+  object btnAdd: TButton
+    Left = 29
+    Top = 470
+    Width = 636
+    Height = 58
+    Caption = 'Add'
+    TabOrder = 1
+  end
+  object dbgCards: TDBGrid
+    Left = 8
+    Top = 0
+    Width = 735
+    Height = 185
+    TabOrder = 2
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+    Columns = <
+      item
+        Expanded = False
+        FieldName = 'cardID'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'cardName'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'trapCard'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'effectCard'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'atk'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'def'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'stars'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'imageSRC'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'detail'
+        Visible = True
+      end>
+  end
+  object btnTest: TButton
+    Left = 344
+    Top = 388
+    Width = 75
+    Height = 41
+    Caption = 'test'
+    TabOrder = 3
+    OnClick = btnTestClick
+  end
+end

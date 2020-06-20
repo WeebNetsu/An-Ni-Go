@@ -1,0 +1,14 @@
+program frmDatabaseHandeling_p;
+
+uses
+  Forms,
+  frmDatabaseHandeling_u in 'frmDatabaseHandeling_u.pas' {Form1};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TForm1, Form1);
+  Application.Run;
+end.

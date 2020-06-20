@@ -1,0 +1,64 @@
+unit frmDatabaseHandeling_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Grids, DBGrids, Spin, ExtCtrls, dmCards_u, Mask,
+  DBCtrls, jpeg;
+
+type
+  TForm1 = class(TForm)
+    btnTest: TButton;
+    imgTest: TImage;
+    DBNavigator1: TDBNavigator;
+    dbgCards: TDBGrid;
+    cbxSort: TComboBox;
+    procedure btnTestClick(Sender: TObject);
+    procedure cbxSortChange(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.btnTestClick(Sender: TObject);
+var
+  sText: string;
+begin
+  // sText := DBEdit1.Text;
+  imgTest.Picture.LoadFromFile('images\traps\Shenron.jpg');
+
+  // memDetails.Lines.Add()
+
+end;
+
+procedure TForm1.cbxSortChange(Sender: TObject);
+begin
+  if cbxSort.ItemIndex = 0 then
+  begin
+    DataModule1.tblCards.Sort := 'atk ASC';
+  end
+  else if cbxSort.ItemIndex = 1 then
+  begin
+    DataModule1.tblCards.Sort := 'atk DESC'
+  end
+  else if cbxSort.ItemIndex = 1 then
+  begin
+    DataModule1.tblCards.Sort := 'cardName DESC'
+  end
+  else
+  begin
+    DataModule1.tblCards.Sort := 'cardName DESC'
+  end;
+
+end;
+
+end.

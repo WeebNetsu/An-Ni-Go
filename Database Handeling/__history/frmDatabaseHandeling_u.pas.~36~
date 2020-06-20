@@ -1,0 +1,81 @@
+unit frmDatabaseHandeling_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Grids, DBGrids, Spin, ExtCtrls, dmCards_u, Mask,
+  DBCtrls, jpeg;
+
+type
+  TForm1 = class(TForm)
+    DBNavigator1: TDBNavigator;
+    dbgCards: TDBGrid;
+    cbxSort: TComboBox;
+    btnSearchName: TButton;
+    procedure cbxSortChange(Sender: TObject);
+    procedure btnSearchNameClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.btnSearchNameClick(Sender: TObject);
+var
+  sSearch: string;
+begin
+  sSearch := InputBox('Search', 'Who would you like to search for?', 'Virgo');
+
+  with datamodule1 do
+  begin
+    tblCards.First;
+
+    while not tblCards.eof do
+    begin
+      if UpperCase(tblCards['cardName']) = UpperCase(sSearch) then
+      begin
+        ShowMessage(tblCards['cardName'] + ' has ' + IntToStr(tblCards['atk'])
+            + ' attack points');
+        Exit;
+      end
+      else
+      begin
+        tblCards.Next;
+      end;
+    end;
+    ShowMessage('Could not find ' + sSearch);
+  end;
+
+end;
+
+procedure TForm1.cbxSortChange(Sender: TObject);
+begin
+  if cbxSort.ItemIndex = 0 then
+  begin
+    datamodule1.tblCards.Sort := 'atk ASC';
+  end
+  else if cbxSort.ItemIndex = 1 then
+  begin
+    datamodule1.tblCards.Sort := 'atk DESC'
+  end
+  else if cbxSort.ItemIndex = 2 then
+  begin
+    datamodule1.tblCards.Sort := 'cardName ASC'
+  end
+  else if cbxSort.ItemIndex = 3 then
+
+  begin
+    datamodule1.tblCards.Sort := 'cardName DESC'
+  end;
+
+end;
+
+end.

@@ -1,0 +1,49 @@
+unit frmDatabaseHandeling_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Grids, DBGrids, Spin, ExtCtrls, dmDataBase_p;
+
+type
+  TForm1 = class(TForm)
+    DBGrid1: TDBGrid;
+    Label1: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    edtName: TEdit;
+    rgbtrap: TRadioGroup;
+    rgbEffect: TRadioGroup;
+    sedAtk: TSpinEdit;
+    sedDef: TSpinEdit;
+    cbStars: TComboBox;
+    edtSrc: TEdit;
+    memDetails: TMemo;
+    btnAdd: TButton;
+    imgTest: TImage;
+    btnTest: TButton;
+    procedure btnTestClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.btnTestClick(Sender: TObject);
+begin
+  // imgTest.Picture.LoadFromFile();
+
+end;
+
+end.

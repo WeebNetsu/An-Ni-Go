@@ -1,0 +1,215 @@
+{ TO-DO list:
+  Function/procedure to see which card is stronger and destroy the weaker one
+  import database methods so you can load images
+  database > arrays
+}
+
+unit frmGame_u;
+
+{
+  Component terms:
+  imgFE - image Fighting Enemy (com fighter on the board)
+  imgFP - image Fighting Player (player fighter on the board)
+}
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, jpeg, StdCtrls, dmConnection_u, ComCtrls, math;
+
+type
+  TfrmGame = class(TForm)
+    pnlBoard: TPanel;
+    pnlEnimyCardHolder: TPanel;
+    imgPDeck: TImage;
+    imgEDeck: TImage;
+    lblPlayerHP: TLabel;
+    lblPP: TLabel;
+    lblCP: TLabel;
+    lblComHP: TLabel;
+    imgE1: TImage;
+    imgE2: TImage;
+    imgE5: TImage;
+    imgE4: TImage;
+    imgE3: TImage;
+    imgE6: TImage;
+    pnlPlayerCardHolder: TPanel;
+    imgP1: TImage;
+    imgP2: TImage;
+    imgP5: TImage;
+    imgP4: TImage;
+    imgP3: TImage;
+    imgP6: TImage;
+    imgFE1: TImage;
+    imgFE2: TImage;
+    imgFE3: TImage;
+    imgFP3: TImage;
+    imgFP2: TImage;
+    imgFP1: TImage;
+    redNames: TRichEdit;
+    btnTest: TButton;
+    btnHelp: TButton;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+    procedure btnTestClick(Sender: TObject);
+  private
+    { Private declarations }
+    arrCards: array [1 .. 148] of String; // all cards
+    arrCardSRC: array [1 .. 148] of String; // Card sources
+    arrCardAtk: array [1 .. 148] of integer; // card attack power
+    arrPlayerCards: array [1 .. 60] of String; // Player deck
+    arrComCards: array [1 .. 60] of String; // computer deck
+
+    procedure addCardsToArray();
+    procedure start();
+  public
+    { Public declarations }
+  end;
+
+var
+  frmGame: TfrmGame;
+
+implementation
+
+uses
+  frmEnter_u;
+{$R *.dfm}
+
+procedure TfrmGame.addCardsToArray();
+var
+  I: integer;
+begin
+  with dmCards do
+  begin
+    tblCards.Open;
+    tblCards.First;
+
+    while not(tblCards.Eof) do
+    begin
+      for I := 1 to Length(arrCards) do
+      begin
+        arrCards[I] := arrCardSRC[I] + ';' + IntToStr(arrCardAtk[I]);
+      end;
+      tblCards.Next;
+    end;
+  end;
+end;
+
+procedure TfrmGame.btnTestClick(Sender: TObject);
+var
+  iCount, I: integer;
+begin
+  with dmCards do
+  begin
+    tblCards.Open;
+    // tblCards.Active := true;
+    tblCards.First;
+    iCount := 1;
+
+    { while not tblCards.Eof do
+      begin
+
+      end; }
+
+    while (not tblCards.Eof) do
+    begin
+      arrCardSRC[iCount] := tblCards['imageSRC'];
+      Inc(iCount);
+      tblCards.Next;
+    end;
+  end;
+
+  for I := 1 to Length(arrCardSRC) do
+  begin
+    redNames.Lines.Add(arrCardSRC[I]);
+  end;
+
+  // imgPDeck.Picture.LoadFromFile(arrCardSRC[2]);
+end;
+
+procedure TfrmGame.FormActivate(Sender: TObject);
+var
+  iCount, I: integer;
+begin
+  lblPlayerHP.Font.Color := clLime;
+  lblPP.Font.Color := clLime; // Player Points (PP)
+  lblComHP.Font.Color := clLime;
+  lblCP.Font.Color := clLime; // computer points (HP)
+
+  with dmCards do
+  begin
+    tblCards.Open;
+    tblCards.First;
+    iCount := 1;
+
+    while (not tblCards.Eof) do
+    begin
+      arrCardSRC[iCount] := tblCards['imageSRC'];
+      arrCardAtk[iCount] := tblCards['atk'];
+      Inc(iCount);
+      tblCards.Next;
+    end;
+  end;
+
+  addCardsToArray();
+  start();
+  // ShowMessage(arrCards[2]);
+  // imgPDeck.Picture.LoadFromFile(DataModule1.tblCards['imageSRC'].);
+end;
+
+procedure TfrmGame.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  iExit: integer;
+begin
+  { iExit := MessageDlg('Are you sure you want to close the gaming screen?',
+    mtWarning, [mbYes, mbNo], 0);
+
+    if iExit = 0 then
+    begin
+    frmEnter.Show;
+    Exit;
+    end
+    else
+    begin
+    frmGame.Show;
+    end; }
+  frmEnter.Show;
+end;
+
+procedure TfrmGame.start;
+var
+  I, j, iCard, iCardATK, iPos1, iPos2, iPos3: integer;
+  sCardSRC: string;
+begin
+  for I := 1 to Length(arrPlayerCards) do
+  begin
+    Randomize;
+    iCard := RandomRange(1, 149);
+
+    /// //Validate cards [Begin]
+    for j := 1 to Length(arrCards) do
+    begin
+      if arrPlayerCards[j] = arrCards[j] then
+      begin
+        iCard := RandomRange(1, 149);
+      end;
+    end;
+    /// //Validate cards [End]
+
+    arrPlayerCards[I] := arrCards[iCard];
+    arrComCards[I] := arrCards[iCard];
+  end;
+
+  iPos1 := Pos(';', arrPlayerCards[1]);
+  iPos2 := Pos(';', arrPlayerCards[2]);
+  iPos3 := Pos(';', arrPlayerCards[3]);
+
+  imgP1.Picture.LoadFromFile(Copy(arrPlayerCards[1], 1, Pos(';',
+        arrPlayerCards[1]) - 1));
+  imgP2.Picture.LoadFromFile(Copy(arrPlayerCards[2], 1, iPos2 - 1));
+  imgP3.Picture.LoadFromFile(Copy(arrPlayerCards[3], 1, iPos3 - 1));
+  // imgPDeck.Picture.LoadFromFile(DataModule1.tblCards['imageSRC'].);
+end;
+
+end.

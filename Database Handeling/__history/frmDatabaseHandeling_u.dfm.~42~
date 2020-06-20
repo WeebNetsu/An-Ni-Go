@@ -1,0 +1,195 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 478
+  ClientWidth = 751
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesktopCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object DBNavigator1: TDBNavigator
+    Left = 88
+    Top = 208
+    Width = 240
+    Height = 25
+    DataSource = DataModule1.dscCards
+    TabOrder = 0
+    Visible = False
+  end
+  object dbgCards: TDBGrid
+    Left = 0
+    Top = 0
+    Width = 743
+    Height = 193
+    DataSource = DataModule1.dscCards
+    TabOrder = 1
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+  end
+  object cbxSort: TComboBox
+    Left = 32
+    Top = 272
+    Width = 121
+    Height = 21
+    TabOrder = 2
+    Text = 'Sort by'
+    OnChange = cbxSortChange
+    Items.Strings = (
+      'Attack (Low to High)'
+      'Attack (High to Low)'
+      'Card Name (A-Z)'
+      'Card Name (Z-A)')
+  end
+  object btnSearchName: TButton
+    Left = 32
+    Top = 312
+    Width = 75
+    Height = 25
+    Caption = 'Search Name'
+    TabOrder = 3
+    OnClick = btnSearchNameClick
+  end
+  object Panel1: TPanel
+    Left = 200
+    Top = 239
+    Width = 337
+    Height = 102
+    Hint = 'Please be careful with this'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 4
+    object Label1: TLabel
+      Left = 144
+      Top = 8
+      Width = 66
+      Height = 13
+      Caption = 'Insert Record'
+    end
+    object edtInsertName: TEdit
+      Left = 7
+      Top = 36
+      Width = 121
+      Height = 21
+      Hint = 'Name'
+      TabOrder = 0
+      Text = 'Name'
+      OnClick = edtInsertNameClick
+      OnExit = edtInsertNameExit
+    end
+    object sedInsertAtk: TSpinEdit
+      Left = 134
+      Top = 35
+      Width = 59
+      Height = 22
+      Increment = 5
+      MaxValue = 10000
+      MinValue = 0
+      TabOrder = 1
+      Value = 0
+    end
+    object btnInsert: TButton
+      Left = 224
+      Top = 32
+      Width = 75
+      Height = 25
+      Caption = 'Insert'
+      TabOrder = 2
+      OnClick = btnInsertClick
+    end
+    object edtInsertSrc: TEdit
+      Left = 7
+      Top = 63
+      Width = 306
+      Height = 21
+      TabOrder = 3
+      Text = 'the/source/to/the/image.jpg'
+      OnClick = edtInsertSrcClick
+      OnExit = edtInsertSrcExit
+    end
+  end
+  object btnDelete: TButton
+    Left = 113
+    Top = 312
+    Width = 81
+    Height = 25
+    Caption = 'Delete Record'
+    TabOrder = 5
+    OnClick = btnDeleteClick
+  end
+  object Panel2: TPanel
+    Left = 200
+    Top = 359
+    Width = 337
+    Height = 102
+    Hint = 'Please be careful with this'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 6
+    object Label2: TLabel
+      Left = 144
+      Top = 8
+      Width = 55
+      Height = 13
+      Caption = 'Edit Record'
+    end
+    object edtEditName: TEdit
+      Left = 7
+      Top = 36
+      Width = 121
+      Height = 21
+      Hint = 'Name'
+      TabOrder = 0
+      OnClick = edtInsertNameClick
+      OnExit = edtInsertNameExit
+    end
+    object sedEdtAtk: TSpinEdit
+      Left = 134
+      Top = 35
+      Width = 59
+      Height = 22
+      Increment = 5
+      MaxValue = 10000
+      MinValue = 0
+      TabOrder = 1
+      Value = 0
+    end
+    object btnEdit: TButton
+      Left = 280
+      Top = 32
+      Width = 51
+      Height = 25
+      Caption = 'Edit'
+      Enabled = False
+      TabOrder = 2
+      OnClick = btnEditClick
+    end
+    object edtEditSrc: TEdit
+      Left = 7
+      Top = 63
+      Width = 306
+      Height = 21
+      TabOrder = 3
+      OnClick = edtInsertSrcClick
+      OnExit = edtInsertSrcExit
+    end
+    object btnFind: TButton
+      Left = 199
+      Top = 32
+      Width = 75
+      Height = 25
+      Caption = 'Find Record'
+      TabOrder = 4
+      OnClick = btnFindClick
+    end
+  end
+end

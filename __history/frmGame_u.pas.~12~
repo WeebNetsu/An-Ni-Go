@@ -1,0 +1,77 @@
+unit frmGame_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, jpeg, StdCtrls;
+
+type
+  TfrmGame = class(TForm)
+    Panel2: TPanel;
+    pnlEnimyCardHolder: TPanel;
+    imgEGrave: TImage;
+    imgPDeck: TImage;
+    imgEDeck: TImage;
+    imgPGrave: TImage;
+    lblPlayerHP: TLabel;
+    lblPP: TLabel;
+    lblCP: TLabel;
+    lblComHP: TLabel;
+    imgE1: TImage;
+    imgE2: TImage;
+    imgE5: TImage;
+    imgE4: TImage;
+    imgE3: TImage;
+    imgE6: TImage;
+    pnlPlayerCardHolder: TPanel;
+    imgP1: TImage;
+    imgP2: TImage;
+    imgP5: TImage;
+    imgP4: TImage;
+    imgP3: TImage;
+    imgP6: TImage;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmGame: TfrmGame;
+
+implementation
+
+uses
+  frmEnter_u;
+{$R *.dfm}
+
+procedure TfrmGame.FormActivate(Sender: TObject);
+begin
+  lblPlayerHP.Font.Color := clLime;
+  lblPP.Font.Color := clLime; // Player Points (PP)
+  lblComHP.Font.Color := clLime;
+  lblCP.Font.Color := clLime; // computer points (HP)
+end;
+
+procedure TfrmGame.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  iExit: integer;
+begin
+  { iExit := MessageDlg('Are you sure you want to close the gaming screen?',
+    mtWarning, [mbYes, mbNo], 0);
+
+    if iExit = 0 then
+    begin
+    frmEnter.Show;
+    Exit;
+    end
+    else
+    begin
+    frmGame.Show;
+    end; }
+end;
+
+end.

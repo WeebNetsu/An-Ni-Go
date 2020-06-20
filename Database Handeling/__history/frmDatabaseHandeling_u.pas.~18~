@@ -1,0 +1,41 @@
+unit frmDatabaseHandeling_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Grids, DBGrids, Spin, ExtCtrls, dmDataBase_p, Mask,
+  DBCtrls, jpeg;
+
+type
+  TForm1 = class(TForm)
+    dbgCards: TDBGrid;
+    btnTest: TButton;
+    imgTest: TImage;
+    DBNavigator1: TDBNavigator;
+    procedure btnTestClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.btnTestClick(Sender: TObject);
+var
+  sText: string;
+begin
+//  sText := DBEdit1.Text;
+  imgTest.Picture.LoadFromFile('images\traps\Shenron.jpg');
+
+  // memDetails.Lines.Add()
+
+end;
+
+end.

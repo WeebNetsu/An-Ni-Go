@@ -1,0 +1,54 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 371
+  ClientWidth = 751
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesktopCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object imgTest: TImage
+    Left = 608
+    Top = 208
+    Width = 105
+    Height = 105
+    Stretch = True
+  end
+  object btnTest: TButton
+    Left = 638
+    Top = 319
+    Width = 75
+    Height = 41
+    Caption = 'test'
+    TabOrder = 0
+    OnClick = btnTestClick
+  end
+  object DBNavigator1: TDBNavigator
+    Left = 88
+    Top = 208
+    Width = 240
+    Height = 25
+    DataSource = DataModule1.dscCards
+    TabOrder = 1
+  end
+  object dbgCards: TDBGrid
+    Left = 0
+    Top = 0
+    Width = 743
+    Height = 193
+    DataSource = DataModule1.dscCards
+    TabOrder = 2
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+  end
+end

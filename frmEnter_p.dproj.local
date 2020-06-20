@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2019 08 14 13:25:45.994.pas,C:\Users\Stephen\Documents\RAD Studio\Projects\Unit1.pas=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\frmEnter_u.pas</Transaction>
+    <Transaction>2019 08 14 13:25:46.016.dfm,C:\Users\Stephen\Documents\RAD Studio\Projects\Unit1.dfm=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\frmEnter_u.dfm</Transaction>
+    <Transaction>2019 08 14 13:25:50.724.dproj,C:\Users\Stephen\Documents\RAD Studio\Projects\Project1.dproj=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\frmEnter_p.dproj</Transaction>
+    <Transaction>2019 08 14 14:31:58.811.pas,C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\Unit1.pas=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\frmGame_u.pas</Transaction>
+    <Transaction>2019 08 14 14:31:58.811.dfm,C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\Unit1.dfm=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\frmGame_u.dfm</Transaction>
+    <Transaction>2019 08 14 14:41:27.813.pas,C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\Unit1.pas=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\dmConnection_u.pas</Transaction>
+    <Transaction>2019 08 14 14:41:27.813.dfm,C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\Unit1.dfm=C:\Users\Stephen\Documents\Coding\Delphi Project\An-Ni-Go!\dmConnection_u.dfm</Transaction>
+    <Transaction>2019/10/02 09:33:29.438.pas,D:\Delphi Project\An-Ni-Go!\Unit1.pas=D:\Delphi Project\An-Ni-Go!\frmWinLose_u.pas</Transaction>
+    <Transaction>2019/10/02 09:33:29.438.dfm,D:\Delphi Project\An-Ni-Go!\Unit1.dfm=D:\Delphi Project\An-Ni-Go!\frmWinLose_u.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

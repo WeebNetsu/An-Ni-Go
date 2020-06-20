@@ -1,0 +1,43 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  Height = 201
+  Width = 168
+  object con: TADOConnection
+    Connected = True
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Stephen\Do' +
+      'cuments\Coding\Delphi Project\An-Ni-Go!\dbCards.mdb;Mode=ReadWri' +
+      'te;Persist Security Info=False'
+    LoginPrompt = False
+    Mode = cmReadWrite
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 32
+    Top = 24
+  end
+  object tblWinLose: TADOTable
+    Active = True
+    Connection = con
+    CursorType = ctStatic
+    TableName = 'tblWinOrLose'
+    Left = 32
+    Top = 72
+  end
+  object tblCards: TADOTable
+    Active = True
+    Connection = con
+    CursorType = ctStatic
+    TableName = 'tblCards'
+    Left = 32
+    Top = 128
+  end
+  object dscWinLose: TDataSource
+    DataSet = tblWinLose
+    Left = 96
+    Top = 72
+  end
+  object dscCards: TDataSource
+    DataSet = tblCards
+    Left = 96
+    Top = 128
+  end
+end

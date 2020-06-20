@@ -1,0 +1,1729 @@
+﻿unit frmGame_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, jpeg, StdCtrls, dmConnection_u, ComCtrls, math;
+
+type
+  TfrmGame = class(TForm)
+    pnlBoard: TPanel;
+    pnlEnimyCardHolder: TPanel;
+    imgPDeck: TImage;
+    imgEDeck: TImage;
+    lblPlayerHP: TLabel;
+    lblPP: TLabel;
+    lblCP: TLabel;
+    lblComHP: TLabel;
+    imgE1: TImage;
+    imgE2: TImage;
+    imgE5: TImage;
+    imgE4: TImage;
+    imgE3: TImage;
+    imgE6: TImage;
+    pnlPlayerCardHolder: TPanel;
+    imgP1: TImage;
+    imgP2: TImage;
+    imgP5: TImage;
+    imgP4: TImage;
+    imgP3: TImage;
+    imgP6: TImage;
+    imgFE1: TImage;
+    imgFE2: TImage;
+    imgFE3: TImage;
+    imgFP3: TImage;
+    imgFP2: TImage;
+    imgFP1: TImage;
+    redNames: TRichEdit;
+    btnTest: TButton;
+    btnHelp: TButton;
+    btnBattlePhase: TButton;
+    btnEndTurn: TButton;
+    lblDraw: TLabel;
+    lblBattle: TLabel;
+    lblWait: TLabel;
+    pnlCardVal1: TPanel;
+    pnlCardVal4: TPanel;
+    pnlCardVal5: TPanel;
+    pnlCardVal2: TPanel;
+    pnlCardVal3: TPanel;
+    pnlCardVal6: TPanel;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+    procedure btnTestClick(Sender: TObject);
+    procedure imgP1Click(Sender: TObject);
+    procedure imgP2Click(Sender: TObject);
+    procedure imgP3Click(Sender: TObject);
+    procedure imgP4Click(Sender: TObject);
+    procedure imgP5Click(Sender: TObject);
+    procedure imgP6Click(Sender: TObject);
+    procedure imgPDeckClick(Sender: TObject);
+    procedure btnEndTurnClick(Sender: TObject);
+    procedure btnBattlePhaseClick(Sender: TObject);
+  private
+    { Private declarations }
+    iDeckCard, iComDeckCard, iTurn, iMove, iGameTurn, iComHP,
+      iPlayerHP: integer;
+    bDraw: boolean;
+
+    arrCardSRC: array [1 .. 148] of String; // Card sources
+    arrPlayerCards: array [1 .. 60] of String; // Player deck
+    arrPlayerCardsAtk: array [1 .. 60] of integer;
+    arrPlayerHand: array [1 .. 6] of string;
+    arrPlayerHandAtk: array [1 .. 6] of integer;
+    arrPlayerCardOnFieldAtk: array [1 .. 3] of integer;
+    arrComCards: array [1 .. 60] of String; // computer deck
+    arrComHand: array [1 .. 6] of String; // Cards in computers hand
+    arrComHandAtk: array [1 .. 6] of integer;
+    arrComCardOnFieldAtk: array [1 .. 3] of integer;
+
+    procedure removeCard;
+    procedure addCardsToArray;
+    procedure draw;
+    procedure battlePhase;
+    procedure newGame;
+    procedure COM;
+    procedure comDraw;
+    procedure comGetStrongestCard(iNumCards: integer);
+    procedure comAddCardToField;
+    procedure comComparePower();
+    procedure comAttack(iCom: integer; iPlayer: integer);
+
+    function attackAgain: boolean;
+  public
+    { Public declarations }
+  end;
+
+var
+  frmGame: TfrmGame;
+
+implementation
+
+uses
+  frmEnter_u;
+{$R *.dfm}
+
+procedure TfrmGame.addCardsToArray();
+var
+  I: integer;
+begin
+  with dmCards do
+  begin
+    tblCards.Open;
+    tblCards.First;
+    for I := 1 to 148 do
+    begin
+      tblCards.Edit;
+      tblCards['used'] := False;
+      tblCards.Next;
+    end;
+
+    // Adds cards to player deck
+    I := 1;
+    while I <= 60 do // deck can only hold 60 cards
+    Begin
+      // Gets random cards
+      if tblCards.locate('cardID', RandomRange(9, 149), []) then
+      begin
+        // if the card is not already in use, then add it to the players hand
+        if tblCards['used'] = False then
+        begin
+          // make it used
+          tblCards.Edit;
+          tblCards['used'] := True;
+          tblCards.Post;
+          arrPlayerCards[I] := tblCards['imageSRC'] + ';' + inttostr
+            (tblCards['atk']);
+          Inc(I);
+        end;
+      end;
+    End; // end of while loop
+
+    // Adds cards to COM deck
+    I := 1;
+    while I <= 60 do // deck can only hold 60 cards
+    Begin
+      // Gets random cards
+      if tblCards.locate('cardID', RandomRange(9, 149), []) then
+      begin
+        // if the card is not already in use, then add it to the COM hand
+        if tblCards['used'] = False then
+        begin
+          // make it used
+          tblCards.Edit;
+          tblCards['used'] := True;
+          tblCards.Post;
+          arrComCards[I] := tblCards['imageSRC'] + ';' + inttostr
+            (tblCards['atk']);
+          Inc(I);
+        end;
+      end;
+    End; // end of while loop
+  end;
+end;
+
+procedure TfrmGame.draw;
+begin
+  if imgP1.Visible = False then
+  begin
+    arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+      Pos(';', arrPlayerCards[iDeckCard]) - 1);
+    arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+        Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+    pnlCardVal1.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+    imgP1.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+
+    Inc(iDeckCard);
+    imgP1.Visible := True;
+  end
+  else if imgP2.Visible = False then
+  begin
+    arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+      Pos(';', arrPlayerCards[iDeckCard]) - 1);
+    arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+        Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+    pnlCardVal2.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+    imgP2.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+
+    Inc(iDeckCard);
+    imgP2.Visible := True;
+  end
+  else if imgP3.Visible = False then
+  begin
+    arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+      Pos(';', arrPlayerCards[iDeckCard]) - 1);
+    arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+        Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+    pnlCardVal3.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+    imgP3.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+
+    Inc(iDeckCard);
+    imgP3.Visible := True;
+  end
+  else if imgP4.Visible = False then
+  begin
+    arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+      Pos(';', arrPlayerCards[iDeckCard]) - 1);
+    arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+        Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+    pnlCardVal4.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+    imgP4.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+
+    Inc(iDeckCard);
+    imgP4.Visible := True;
+  end
+  else if imgP5.Visible = False then
+  begin
+    arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+      Pos(';', arrPlayerCards[iDeckCard]) - 1);
+    arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+        Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+    pnlCardVal5.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+    imgP5.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+
+    Inc(iDeckCard);
+    imgP5.Visible := True;
+  end
+  else if imgP6.Visible = False then
+  begin
+    arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+      Pos(';', arrPlayerCards[iDeckCard]) - 1);
+    arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+        Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+    pnlCardVal6.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+    imgP6.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+
+    Inc(iDeckCard);
+    imgP6.Visible := True;
+  end
+  else
+  begin
+    ShowMessage('Please discard 1 card from your hand.');
+    removeCard;
+  end;
+
+  bDraw := True;
+end;
+
+procedure TfrmGame.btnBattlePhaseClick(Sender: TObject);
+begin
+  if iGameTurn = 1 then
+  begin
+    ShowMessage('You cannot play first');
+    Exit;
+  end;
+
+  lblDraw.Visible := False;
+  lblBattle.Visible := True;
+  lblWait.Visible := False;
+
+  battlePhase;
+
+  lblPP.Caption := inttostr(iPlayerHP);
+  lblCP.Caption := inttostr(iComHP);
+end;
+
+procedure TfrmGame.btnEndTurnClick(Sender: TObject);
+begin
+  // ShowMessage(inttostr(iGameTurn));
+  if iTurn = 1 then
+  begin
+    Inc(iGameTurn); // if iGameturn mod 2 = 0 : COM turn
+    btnBattlePhase.Enabled := True;
+    lblDraw.Visible := False;
+    lblBattle.Visible := False;
+    lblWait.Visible := True;
+    bDraw := False;
+    iMove := 0;
+
+    COM;
+  end
+  else
+  begin
+    ShowMessage('You have to draw first');
+  end;
+end;
+
+procedure TfrmGame.btnTestClick(Sender: TObject);
+var
+  iCount, I: integer;
+begin
+  with dmCards do
+  begin
+    tblCards.Open;
+    // tblCards.Active := true;
+    tblCards.First;
+    iCount := 1;
+
+    while (not tblCards.Eof) do
+    begin
+      arrCardSRC[iCount] := tblCards['imageSRC'];
+      Inc(iCount);
+      tblCards.Next;
+    end;
+  end;
+
+  for I := 1 to Length(arrCardSRC) do
+  begin
+    redNames.Lines.Add(arrCardSRC[I]);
+  end;
+
+  // imgPDeck.Picture.LoadFromFile(arrCardSRC[2]);
+end;
+
+procedure TfrmGame.COM;
+begin
+  comDraw; // draws card
+
+  if (imgE6.Visible) and (imgE5.Visible) and (imgE4.Visible) and
+    (imgE3.Visible) and (imgE2.Visible) and (imgE1.Visible) then
+  begin
+    comGetStrongestCard(6);
+    comAddCardToField;
+  end
+  else // end of if statement
+    if (imgE6.Visible) and (imgE5.Visible) and (imgE4.Visible) and
+    (imgE3.Visible) and (imgE2.Visible) then
+  begin
+    comGetStrongestCard(5);
+    comAddCardToField;
+  end
+  else // end of if statement
+    if (imgE6.Visible) and (imgE5.Visible) and (imgE4.Visible) and
+    (imgE3.Visible) then
+  begin
+    comGetStrongestCard(4);
+    comAddCardToField;
+  end
+  else // end of if statement
+    if (imgE6.Visible) and (imgE5.Visible) and (imgE4.Visible) then
+  begin
+    comGetStrongestCard(3);
+    comAddCardToField;
+  end
+  else // end of if statement
+    if (imgE6.Visible) and (imgE5.Visible) then
+  begin
+    comGetStrongestCard(2);
+    comAddCardToField;
+  end
+  else // end of if statement
+    if imgE6.Visible then
+  begin
+    { play card }
+    comAddCardToField;
+  end
+  else // end of if statement
+  begin
+    { end turn }
+    ShowMessage('Error 1: Please restart the application');
+  end;
+
+  Inc(iGameTurn);
+  // iTurn := 0;
+
+  { iCardAttack := copy(arrComCards[iComCard],
+    Pos(';', arrComCards[iComCard]) + 1, 5); }
+
+end;
+
+procedure TfrmGame.comAddCardToField;
+begin
+  if not(imgFE1.Visible) then
+  begin
+    imgFE1.Picture.LoadFromFile(copy(arrComHand[1], 1,
+        Pos(';', arrComHand[1]) - 1));
+    imgFE1.Visible := True;
+    { imgE6 is because: The strongest card gets put at the position of imgE6,
+      so the card can get removed without having to worry that the card may be
+      the wrong card to remove }
+    imgE6.Visible := False;
+    arrComCardOnFieldAtk[1] := arrComHandAtk[1];
+  end
+  else if not(imgFE2.Visible) then
+  begin
+    imgFE2.Picture.LoadFromFile(copy(arrComHand[1], 1,
+        Pos(';', arrComHand[1]) - 1));
+    imgFE2.Visible := True;
+    imgE6.Visible := False;
+    arrComCardOnFieldAtk[2] := arrComHandAtk[1];
+  end
+  else if not(imgFE3.Visible) then
+  begin
+    imgFE3.Picture.LoadFromFile(copy(arrComHand[1], 1,
+        Pos(';', arrComHand[1]) - 1));
+    imgFE3.Visible := True;
+    imgE6.Visible := False;
+    arrComCardOnFieldAtk[3] := arrComHandAtk[1];
+  end
+  else
+  begin
+    { end turn }
+  end;
+end;
+
+procedure TfrmGame.comAttack(iCom, iPlayer: integer);
+begin
+  // code
+end;
+
+function TfrmGame.attackAgain: boolean;
+var
+  iPlayerCard, iComCard, iDamage: integer;
+  bCard1Atk, bCard2Atk, bCard3Atk: boolean; // did they already attack?
+  sGoAgain: string;
+begin
+  bCard1Atk := False;
+  bCard2Atk := False;
+  bCard3Atk := False;
+  ShowMessage(inttostr(arrComCardOnFieldAtk[1]));
+
+  iPlayerCard := strToint(InputBox('Battle Phase',
+      'Which card do you want to attack with?(1-3)', ''));
+
+  if iPlayerCard = 1 then
+  begin
+    if imgFP1.Visible then
+    begin
+      if bCard1Atk = False then
+      begin
+        iComCard := strToint(InputBox('Battle Phase',
+            'Which card do you want to attack?(1-3)', ''));
+
+        if iComCard = 1 then
+        begin
+          if imgFE1.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[1];
+            bCard1Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP1.Visible := False;
+              imgFE1.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE1.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP + iDamage;
+            end
+            else
+            begin
+              imgFP1.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE1.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end // end of if iComCard = 1
+        else if iComCard = 2 then
+        begin
+          if imgFE2.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[2];
+            bCard1Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP1.Visible := False;
+              imgFE2.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE2.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP1.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE2.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end // end of iComCard = 2
+        else if iComCard = 3 then
+        begin
+          if imgFE3.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[3];
+            bCard1Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP1.Visible := False;
+              imgFE3.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE3.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP1.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE3.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end; // end of iComCard = 3
+      end
+      else // end of if bCard1Atk
+      begin
+        ShowMessage('You already attacked with this card');
+        sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+        if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+        begin
+          result := True;
+        end
+        else
+        begin
+          result := False;
+        end;
+      end;
+    end // end of if imgFP1.visible
+    else
+    begin
+      ShowMessage('That card does not exist on the field.');
+      sGoAgain := InputBox('Again?', 'Want to choose again? (y/n)', 'n');
+
+      if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+      begin
+        result := True;
+      end
+      else
+      begin
+        result := False;
+      end;
+    end;
+  end // end of if iPlayerCard = 1
+  else if iPlayerCard = 2 then
+  begin
+    if imgFP2.Visible then
+    begin
+      if bCard2Atk = False then
+      begin
+        iComCard := strToint(InputBox('Battle Phase',
+            'Which card do you want to attack?(1-3)', ''));
+
+        if iComCard = 1 then
+        begin
+          if imgFE1.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[1];
+            bCard2Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP2.Visible := False;
+              imgFE1.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE1.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP2.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE1.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end // end of if iComCard = 1
+        else if iComCard = 2 then
+        begin
+          if imgFE2.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[2];
+            bCard2Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP2.Visible := False;
+              imgFE2.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE2.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP2.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE2.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end // end of iComCard = 2
+        else if iComCard = 3 then
+        begin
+          if imgFE3.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[3];
+            bCard2Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP2.Visible := False;
+              imgFE3.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE3.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP2.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE3.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end; // end of iComCard = 3
+      end
+      else // end of if bCard1Atk
+      begin
+        ShowMessage('You already attacked with this card');
+        sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+        if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+        begin
+          result := True;
+        end
+        else
+        begin
+          result := False;
+        end;
+      end;
+    end // end of if imgFP2.visible
+    else
+    begin
+      ShowMessage('That card does not exist on the field.');
+      sGoAgain := InputBox('Again?', 'Want to choose again? (y/n)', 'n');
+
+      if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+      begin
+        result := True;
+      end
+      else
+      begin
+        result := False;
+      end;
+    end;
+  end // end of if iPlayerCard = 2
+  else if iPlayerCard = 3 then
+  begin
+    if imgFP2.Visible then
+    begin
+      if bCard3Atk = False then
+      begin
+        iComCard := strToint(InputBox('Battle Phase',
+            'Which card do you want to attack?(1-3)', ''));
+
+        if iComCard = 1 then
+        begin
+          if imgFE1.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[1];
+            bCard3Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP3.Visible := False;
+              imgFE1.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE1.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP3.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE1.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end // end of if iComCard = 1
+        else if iComCard = 2 then
+        begin
+          if imgFE2.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[2];
+            bCard3Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP3.Visible := False;
+              imgFE2.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE2.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP3.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE2.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end // end of iComCard = 2
+        else if iComCard = 3 then
+        begin
+          if imgFE3.Visible then
+          begin
+            iDamage := arrPlayerCardOnFieldAtk[iPlayerCard] -
+              arrComCardOnFieldAtk[3];
+            bCard3Atk := True;
+
+            if iDamage = 0 then
+            begin
+              imgFP3.Visible := False;
+              imgFE3.Visible := False;
+
+              ShowMessage('The damage done was 0 - Both cards were destroyed');
+            end
+            else if iDamage > 0 then
+            begin
+              imgFE3.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - Computers card was destroyed');
+
+              iComHP := iComHP - iDamage;
+            end
+            else
+            begin
+              imgFP3.Visible := False;
+
+              ShowMessage('The damage done was ' + inttostr(iDamage)
+                  + ' - your card was destroyed :(');
+
+              iPlayerHP := iPlayerHP + iDamage;
+            end;
+          end // end of if imgFE3.visible
+          else
+          begin
+            ShowMessage('That card is not on the field');
+            sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+            if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+            begin
+              result := True;
+            end
+            else
+            begin
+              result := False;
+            end;
+          end;
+        end; // end of iComCard = 3
+      end
+      else // end of if bCard1Atk
+      begin
+        ShowMessage('You already attacked with this card');
+        sGoAgain := InputBox('Again?', 'Attack again? (y/n)', 'n');
+
+        if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+        begin
+          result := True;
+        end
+        else
+        begin
+          result := False;
+        end;
+      end;
+    end // end of if imgFP3.visible
+    else
+    begin
+      ShowMessage('That card does not exist on the field.');
+      sGoAgain := InputBox('Again?', 'Want to choose again? (y/n)', 'n');
+
+      if (sGoAgain = 'y') OR (sGoAgain = 'Y') then
+      begin
+        result := True;
+      end
+      else
+      begin
+        result := False;
+      end;
+    end;
+  end;
+end;
+
+procedure TfrmGame.battlePhase;
+var
+  bAgain: boolean;
+begin
+  bAgain := attackAgain;
+
+  if bAgain then
+  begin
+    attackAgain;
+  end;
+end;
+
+procedure TfrmGame.comComparePower();
+begin
+  if imgFE1.Visible then
+  begin
+    if (imgFP1.Visible) and (imgFP2.Visible) and (imgFP3.Visible) then
+    begin
+      if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[1] then
+      begin
+        comAttack(1, 1);
+      end
+      else if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[2] then
+      begin
+        comAttack(1, 2);
+      end
+      else if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[3] then
+      begin
+        comAttack(1, 3);
+      end
+      else if (imgFP1.Visible) and (imgFP2.Visible) then
+      begin
+        if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[1] then
+        begin
+          comAttack(1, 1);
+        end
+        else if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[2] then
+        begin
+          comAttack(1, 2);
+        end
+        else if (imgFP1.Visible) and (imgFP3.Visible) then
+        begin
+          if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[1] then
+          begin
+            comAttack(1, 1);
+          end
+          else if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[3] then
+          begin
+            comAttack(1, 3);
+          end
+          else if (imgFP2.Visible) and (imgFP3.Visible) then
+          begin
+            if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[2] then
+            begin
+              comAttack(1, 2);
+            end
+            else if arrComCardOnFieldAtk[1] > arrPlayerCardOnFieldAtk[3] then
+            begin
+              comAttack(1, 3);
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  if imgFE2.Visible then
+  begin
+    if (imgFP1.Visible) and (imgFP2.Visible) and (imgFP3.Visible) then
+    begin
+      if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[1] then
+      begin
+        comAttack(2, 1);
+      end
+      else if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[2] then
+      begin
+        comAttack(2, 2);
+      end
+      else if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[3] then
+      begin
+        comAttack(2, 3);
+      end
+      else if (imgFP1.Visible) and (imgFP2.Visible) then
+      begin
+        if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[1] then
+        begin
+          comAttack(2, 1);
+        end
+        else if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[2] then
+        begin
+          comAttack(2, 2);
+        end
+        else if (imgFP1.Visible) and (imgFP3.Visible) then
+        begin
+          if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[1] then
+          begin
+            comAttack(2, 1);
+          end
+          else if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[3] then
+          begin
+            comAttack(2, 3);
+          end
+          else if (imgFP2.Visible) and (imgFP3.Visible) then
+          begin
+            if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[2] then
+            begin
+              comAttack(2, 2);
+            end
+            else if arrComCardOnFieldAtk[2] > arrPlayerCardOnFieldAtk[3] then
+            begin
+              comAttack(2, 3);
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  if imgFE3.Visible then
+  begin
+    if (imgFP1.Visible) and (imgFP2.Visible) and (imgFP3.Visible) then
+    begin
+      if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[1] then
+      begin
+        comAttack(3, 1);
+      end
+      else if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[2] then
+      begin
+        comAttack(3, 2);
+      end
+      else if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[3] then
+      begin
+        comAttack(3, 3);
+      end
+      else if (imgFP1.Visible) and (imgFP2.Visible) then
+      begin
+        if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[1] then
+        begin
+          comAttack(3, 1);
+        end
+        else if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[2] then
+        begin
+          comAttack(3, 2);
+        end
+        else if (imgFP1.Visible) and (imgFP3.Visible) then
+        begin
+          if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[1] then
+          begin
+            comAttack(3, 1);
+          end
+          else if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[3] then
+          begin
+            comAttack(3, 3);
+          end
+          else if (imgFP2.Visible) and (imgFP3.Visible) then
+          begin
+            if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[2] then
+            begin
+              comAttack(3, 2);
+            end
+            else if arrComCardOnFieldAtk[3] > arrPlayerCardOnFieldAtk[3] then
+            begin
+              comAttack(3, 3);
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TfrmGame.comDraw;
+begin
+  if imgE6.Visible = False then
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    Inc(iComDeckCard);
+    imgE6.Visible := True;
+  end
+  else if imgE5.Visible = False then
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    Inc(iDeckCard);
+    imgE5.Visible := True;
+  end
+  else if imgE4.Visible = False then
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    Inc(iDeckCard);
+    imgE4.Visible := True;
+  end
+  else if imgE3.Visible = False then
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    Inc(iDeckCard);
+    imgE3.Visible := True;
+  end
+  else if imgE2.Visible = False then
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    Inc(iDeckCard);
+    imgE2.Visible := True;
+  end
+  else if imgE1.Visible = False then
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    Inc(iDeckCard);
+    imgE1.Visible := True;
+  end
+  else
+  begin
+    imgE3.Visible := False;
+    comDraw;
+  end;
+end;
+
+procedure TfrmGame.comGetStrongestCard(iNumCards: integer);
+var
+  I, j, iTemp: integer;
+  sTemp: string;
+begin
+  ShowMessage(inttostr(arrComHandAtk[1]));
+  for I := 1 to iNumCards do
+  begin
+    for j := I + 1 to iNumCards do
+    begin
+      if arrComHandAtk[I] < arrComHandAtk[j] then
+      begin
+        sTemp := arrComHand[I];
+        arrComHand[I] := arrComHand[j];
+        arrComHand[j] := sTemp;
+
+        iTemp := arrComHandAtk[I];
+        arrComHandAtk[I] := arrComHandAtk[j];
+        arrComHandAtk[j] := iTemp;
+      end; // end of if i < j
+    end; // end of j loop
+  end; // end of i loop
+
+  ShowMessage(inttostr(arrComHandAtk[1]));
+end;
+
+procedure TfrmGame.FormActivate(Sender: TObject);
+var
+  I: integer;
+begin
+  newGame;
+
+  iDeckCard := 1;
+  iComDeckCard := 1;
+  iGameTurn := 1;
+  iMove := 0;
+
+  lblPlayerHP.Font.Color := clLime;
+  lblPP.Font.Color := clLime; // Player Points (PP)
+  lblComHP.Font.Color := clLime;
+  lblCP.Font.Color := clLime; // computer points (HP)
+  lblDraw.Visible := True;
+  lblBattle.Visible := False;
+  lblWait.Visible := False;
+
+  addCardsToArray;
+
+  while iDeckCard <= 3 do
+  begin
+    if iDeckCard = 1 then
+    begin
+      arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+        Pos(';', arrPlayerCards[iDeckCard]) - 1);
+      arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+          Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+      // stores the cards attack value
+      pnlCardVal1.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+      imgP1.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+    end
+    else if iDeckCard = 2 then
+    begin
+      arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+        Pos(';', arrPlayerCards[iDeckCard]) - 1);
+      arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+          Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+      pnlCardVal2.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+      imgP2.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+    end
+    else if iDeckCard = 3 then
+    begin
+      arrPlayerHand[iDeckCard] := copy(arrPlayerCards[iDeckCard], 1,
+        Pos(';', arrPlayerCards[iDeckCard]) - 1);
+      arrPlayerHandAtk[iDeckCard] := strToint(copy(arrPlayerCards[iDeckCard],
+          Pos(';', arrPlayerCards[iDeckCard]) + 1, 5));
+
+      pnlCardVal3.Caption := inttostr(arrPlayerHandAtk[iDeckCard]);
+      imgP3.Picture.LoadFromFile(arrPlayerHand[iDeckCard]);
+    end;
+    Inc(iDeckCard);
+  end;
+
+  iTurn := 0;
+  btnBattlePhase.Enabled := False;
+
+  while iComDeckCard < 4 do
+  begin
+    arrComHand[iComDeckCard] := arrComCards[iComDeckCard];
+    arrComHandAtk[iComDeckCard] := strToint(copy(arrComHand[iComDeckCard],
+        Pos(';', arrComHand[iComDeckCard]) + 1, 5));
+    Inc(iComDeckCard);
+  end;
+end;
+
+procedure TfrmGame.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  iExit: integer;
+begin
+  { iExit := MessageDlg('Are you sure you want to close the gaming screen?',
+    mtWarning, [mbYes, mbNo], 0);
+
+    if iExit = 0 then
+    begin
+    frmEnter.Show;
+    Exit;
+    end
+    else
+    begin
+    frmGame.Show;
+    end; }
+  frmEnter.Show;
+end;
+
+procedure TfrmGame.imgP1Click(Sender: TObject);
+begin
+  // make sure its the players turn
+  if iGameTurn mod 2 <> 0 then
+  begin
+
+    // Make sure the player does not play on FormActivate
+    if iTurn >= 1 then
+    begin
+
+      if iMove = 0 then
+      begin
+        // Make sure that there is space open for adding another card
+        if imgFP1.Visible = False then
+        begin
+          imgFP1.Picture := imgP1.Picture;
+          imgFP1.Visible := True;
+          imgP1.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[1] := strToint(pnlCardVal1.Caption);
+        end
+        else if imgFP2.Visible = False then
+        begin
+          imgFP2.Picture := imgP1.Picture;
+          imgFP2.Visible := True;
+          imgP1.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[2] := strToint(pnlCardVal1.Caption);
+        end
+        else if imgFP3.Visible = False then
+        begin
+          imgFP3.Picture := imgP1.Picture;
+          imgFP3.Visible := True;
+          imgP1.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[3] := strToint(pnlCardVal1.Caption);
+        end
+        else
+        begin
+          ShowMessage('No open spaces are avalible');
+        end; // end of if iMove = 0
+      end // end of if iTurn = 1
+      else
+      begin
+        ShowMessage('You can only play 1 card per turn');
+      end;
+    end // end of if iGameTurn
+    else
+    begin
+      ShowMessage('You have to draw first');
+    end;
+  end
+  else
+  begin
+    ShowMessage('You can only play on your turn');
+  end;
+end;
+
+procedure TfrmGame.imgP2Click(Sender: TObject);
+begin
+  if iGameTurn mod 2 <> 0 then
+  begin
+    if iTurn = 1 then
+    begin
+      if iMove = 0 then
+      begin
+        if imgFP1.Visible = False then
+        begin
+          imgFP1.Picture := imgP2.Picture;
+          imgFP1.Visible := True;
+          imgP2.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[1] := strToint(pnlCardVal2.Caption);
+        end
+        else if imgFP2.Visible = False then
+        begin
+          imgFP2.Picture := imgP2.Picture;
+          imgFP2.Visible := True;
+          imgP2.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[2] := strToint(pnlCardVal2.Caption);
+        end
+        else if imgFP3.Visible = False then
+        begin
+          imgFP3.Picture := imgP2.Picture;
+          imgFP3.Visible := True;
+          imgP2.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[3] := strToint(pnlCardVal2.Caption);
+        end
+        else
+        begin
+          ShowMessage('No open spaces are avalible');
+        end;
+      end
+      else
+      begin
+        ShowMessage('You can only play 1 card per turn');
+      end;
+    end
+    else
+    begin
+      ShowMessage('You have to draw first');
+    end;
+  end
+  else
+  begin
+    ShowMessage('You can only play on your turn');
+  end;
+end;
+
+procedure TfrmGame.imgP3Click(Sender: TObject);
+begin
+  if iGameTurn mod 2 <> 0 then
+  begin
+    if iTurn = 1 then
+    begin
+      if iMove = 0 then
+      begin
+        if imgFP1.Visible = False then
+        begin
+          imgFP1.Picture := imgP3.Picture;
+          imgFP1.Visible := True;
+          imgP3.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[1] := strToint(pnlCardVal3.Caption);
+        end
+        else if imgFP2.Visible = False then
+        begin
+          imgFP2.Picture := imgP3.Picture;
+          imgFP2.Visible := True;
+          imgP3.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[2] := strToint(pnlCardVal3.Caption);
+        end
+        else if imgFP3.Visible = False then
+        begin
+          imgFP3.Picture := imgP3.Picture;
+          imgFP3.Visible := True;
+          imgP3.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[3] := strToint(pnlCardVal3.Caption);
+        end // end of if iMove = 0
+        else
+        begin
+          ShowMessage('No open spaces are avalible');
+        end;
+      end
+      else
+      begin
+        ShowMessage('You can only play 1 card per turn');
+      end;
+    end
+    else
+    begin
+      ShowMessage('You have to draw first');
+    end;
+  end
+  else
+  begin
+    ShowMessage('You can only play on your turn');
+  end;
+end;
+
+procedure TfrmGame.imgP4Click(Sender: TObject);
+begin
+  if iGameTurn mod 2 <> 0 then
+  begin
+    if iTurn = 1 then
+    begin
+      if iMove = 0 then
+      begin
+        if imgFP1.Visible = False then
+        begin
+          imgFP1.Picture := imgP4.Picture;
+          imgFP1.Visible := True;
+          imgP4.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[1] := strToint(pnlCardVal4.Caption);
+        end
+        else if imgFP2.Visible = False then
+        begin
+          imgFP2.Picture := imgP4.Picture;
+          imgFP2.Visible := True;
+          imgP4.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[2] := strToint(pnlCardVal4.Caption);
+        end
+        else if imgFP3.Visible = False then
+        begin
+          imgFP3.Picture := imgP4.Picture;
+          imgFP3.Visible := True;
+          imgP4.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[3] := strToint(pnlCardVal4.Caption);
+        end
+        else
+        begin
+          ShowMessage('No open spaces are avalible');
+        end;
+      end
+      else
+      begin
+        ShowMessage('You can only play 1 card per turn');
+      end;
+    end
+    else
+    begin
+      ShowMessage('You have to draw first');
+    end;
+  end
+  else
+  begin
+    ShowMessage('You can only play on your turn');
+  end;
+end;
+
+procedure TfrmGame.imgP5Click(Sender: TObject);
+begin
+  if iGameTurn mod 2 <> 0 then
+  begin
+    if iTurn = 1 then
+    begin
+      if iMove = 0 then
+      begin
+        if imgFP1.Visible = False then
+        begin
+          imgFP1.Picture := imgP5.Picture;
+          imgFP1.Visible := True;
+          imgP5.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[1] := strToint(pnlCardVal5.Caption);
+        end
+        else if imgFP2.Visible = False then
+        begin
+          imgFP2.Picture := imgP5.Picture;
+          imgFP2.Visible := True;
+          imgP5.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[2] := strToint(pnlCardVal5.Caption);
+        end
+        else if imgFP3.Visible = False then
+        begin
+          imgFP3.Picture := imgP5.Picture;
+          imgFP3.Visible := True;
+          imgP5.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[3] := strToint(pnlCardVal5.Caption);
+        end
+        else
+        begin
+          ShowMessage('No open spaces are avalible');
+        end;
+      end
+      else
+      begin
+        ShowMessage('You can only play 1 card per turn');
+      end;
+    end
+    else
+    begin
+      ShowMessage('You have to draw first');
+    end;
+  end
+  else
+  begin
+    ShowMessage('You can only play on your turn');
+  end;
+end;
+
+procedure TfrmGame.imgP6Click(Sender: TObject);
+begin
+  if iGameTurn mod 2 <> 0 then
+  begin
+    if iTurn = 1 then
+    begin
+      if iMove = 0 then
+      begin
+        if imgFP1.Visible = False then
+        begin
+          imgFP1.Picture := imgP6.Picture;
+          imgFP1.Visible := True;
+          imgP6.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[1] := strToint(pnlCardVal6.Caption);
+        end
+        else if imgFP2.Visible = False then
+        begin
+          imgFP2.Picture := imgP6.Picture;
+          imgFP2.Visible := True;
+          imgP6.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[2] := strToint(pnlCardVal6.Caption);
+        end
+        else if imgFP3.Visible = False then
+        begin
+          imgFP3.Picture := imgP6.Picture;
+          imgFP3.Visible := True;
+          imgP6.Visible := False;
+          iMove := 1;
+          arrPlayerCardOnFieldAtk[3] := strToint(pnlCardVal6.Caption);
+        end
+        else
+        begin
+          ShowMessage('No open spaces are avalible');
+        end;
+      end
+      else
+      begin
+        ShowMessage('You can only play 1 card per turn');
+      end;
+    end
+    else
+    begin
+      ShowMessage('You have to draw first');
+    end;
+  end
+  else
+  begin
+    ShowMessage('You can only play on your turn');
+  end;
+end;
+
+procedure TfrmGame.imgPDeckClick(Sender: TObject);
+begin
+  if iTurn = 0 then
+  begin
+    draw;
+    Inc(iTurn);
+    Exit;
+  end;
+
+  if bDraw = True then
+  begin
+    ShowMessage('You can only draw once per turn');
+    Exit;
+  end;
+
+  draw;
+end;
+
+procedure TfrmGame.newGame;
+begin
+  iComHP := 8000;
+  iPlayerHP := 8000;
+
+  imgP1.Visible := True;
+  imgP2.Visible := True;
+  imgP3.Visible := True;
+  imgP4.Visible := False;
+  imgP5.Visible := False;
+  imgP6.Visible := False;
+
+  imgFP1.Visible := False;
+  imgFP2.Visible := False;
+  imgFP3.Visible := False;
+  imgFE1.Visible := False;
+  imgFE2.Visible := False;
+  imgFE3.Visible := False;
+end;
+
+procedure TfrmGame.removeCard;
+var
+  iCard: integer;
+begin
+  iCard := strToint(InputBox('Remove Card',
+      'Which card do you want to dispose of?', '1'));
+
+  if iCard = 1 then
+  begin
+    imgP1.Visible := False;
+    draw;
+  end
+  else if iCard = 2 then
+  begin
+    imgP2.Visible := False;
+    draw;
+  end
+  else if iCard = 3 then
+  begin
+    imgP3.Visible := False;
+    draw;
+  end
+  else if iCard = 4 then
+  begin
+    imgP4.Visible := False;
+    draw;
+  end
+  else if iCard = 5 then
+  begin
+    imgP5.Visible := False;
+    draw;
+  end
+  else if iCard = 6 then
+  begin
+    imgP6.Visible := False;
+    draw;
+  end
+  else
+  begin
+    ShowMessage('Only enter numbers from 1 to 6');
+    removeCard;
+  end;
+end;
+
+end.

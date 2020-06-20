@@ -1,0 +1,43 @@
+unit frmGame_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, jpeg, StdCtrls;
+
+type
+  TfrmGame = class(TForm)
+    Panel2: TPanel;
+    Panel3: TPanel;
+    Panel1: TPanel;
+    imgEGrave: TImage;
+    imgPDeck: TImage;
+    imgEDeck: TImage;
+    imgPGrave: TImage;
+    lblPlayerHP: TLabel;
+    lblHP: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmGame: TfrmGame;
+
+implementation
+
+uses
+  frmEnter_u;
+{$R *.dfm}
+
+procedure TfrmGame.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  frmEnter.Close;
+end;
+
+end.

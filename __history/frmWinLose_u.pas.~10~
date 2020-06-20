@@ -1,0 +1,52 @@
+unit frmWinLose_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls;
+
+type
+  TfrmWinLose = class(TForm)
+    lblWin: TLabel;
+    lblLose: TLabel;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmWinLose: TfrmWinLose;
+
+implementation
+
+uses
+  frmEnter_u, frmGame_u;
+{$R *.dfm}
+
+procedure TfrmWinLose.FormActivate(Sender: TObject);
+begin
+  frmWinLose.Width := Screen.Width;
+  frmWinLose.Height := Screen.Height;
+
+  if frmGame.bGameEndWinner then
+  begin
+    lblWin.Visible := true;
+    lblLose.Visible := false;
+  end
+  else
+  begin
+    lblWin.Visible := false;
+    lblLose.Visible := true;
+  end;
+end;
+
+procedure TfrmWinLose.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  frmEnter.Show;
+end;
+
+end.

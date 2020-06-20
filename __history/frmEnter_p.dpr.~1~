@@ -1,0 +1,14 @@
+program frmEnter_p;
+
+uses
+  Forms,
+  frmEnter_u in 'frmEnter_u.pas' {frmEnter};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmEnter, frmEnter);
+  Application.Run;
+end.
